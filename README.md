@@ -25,20 +25,23 @@ SenSeqNet is **available on PyPI**. You can install it with:
 
 ```bash
 pip install senseqnet
-
+```
 ---
+
 
 ## Usage
 
 Once installed, the CLI tool senseqnet-predict is available.
 Below is a simple example using CUDA:
 
+```bash
 senseqnet-predict --fasta test_sequences.fasta --device cuda
+```
 
-Command-Line Arguments
+Command-Line Arguments 
 --fasta: Path to your input FASTA file (required).
 --device: Inference device (e.g., "cpu" or "cuda"). Defaults to "cuda" if available.
 
 
-Contact
+## Contact
 For inquiries, please contact Hanli Jiang at: hhanli.jiang@mail.utoronto.ca
