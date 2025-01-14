@@ -42,6 +42,8 @@ Command-Line Arguments
 --fasta: Path to your input FASTA file (required).
 --device: Inference device (e.g., "cpu" or "cuda"). Defaults to "cuda" if available.
 
+Google Colab sample notebook: https://colab.research.google.com/drive/1e9lMOIIvppdpAYRy7LUYUPh2xpzpp8cr?usp=sharing
+
 
 ## Contact
 For inquiries, please contact Hanli Jiang at: hhanli.jiang@mail.utoronto.ca
