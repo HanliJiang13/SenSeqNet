@@ -1,8 +1,7 @@
 # SenSeqNet: A Deep Learning Framework for Cellular Senescence Detection from Protein Sequences
 
-This repository includes source code, datasets, and models for the study:
+This repository includes source code, datasets, and models for the study "SenSeqNet: A Deep Learning Framework for Cellular Senescence Detection from Protein Sequences".
 
-**Hanli Jiang, Li Lin, Dongliang Deng, Jianyu Ren, Xin Yang, Lubin Liu (2024) (in submission)**
 
 ---
 
