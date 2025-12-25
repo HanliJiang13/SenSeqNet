@@ -8,18 +8,21 @@ import esm
 
 from senseqnet.models import ImprovedLSTMClassifier
 
+MODEL_FILENAME = "SenSeqNet_model.pth"
+ESM_MODEL_NAME = "esm2_t33_650M_UR50D"
+
 def load_pretrained_model(device="cuda"):
     """
     Initializes the ImprovedLSTMClassifier with your chosen hyperparams,
-    loads the 'senseqnet.pth' checkpoint, and returns the model in eval mode.
+    loads the 'SenSeqNet_model.pth' checkpoint, and returns the model in eval mode.
     """
 
-    checkpoint_path = os.path.join(os.path.dirname(__file__), "senseqnet.pth")
+    checkpoint_path = os.path.join(os.path.dirname(__file__), MODEL_FILENAME)
 
-    input_dim = 480         # for ESM2_t12_35M
+    input_dim = 1280        # for ESM2_t33_650M_UR50D
     hidden_dim = 181
     num_layers = 4
-    dropout_rate = 0.4397
+    dropout_rate = 0.4397133138964481
     num_classes = 2
 
     model = ImprovedLSTMClassifier(input_dim, hidden_dim, num_layers, num_classes, dropout_rate)
@@ -30,29 +33,31 @@ def load_pretrained_model(device="cuda"):
 
 def extract_esm_features(sequences, device="cuda"):
     """
-    Returns an (N, 480) mean-pooled ESM2 embedding array.
+    Returns an (N, 1280) mean-pooled ESM2 embedding array.
     """
-    esm_model, alphabet = esm.pretrained.esm2_t12_35M_UR50D()
+    model_loader = getattr(esm.pretrained, ESM_MODEL_NAME)
+    esm_model, alphabet = model_loader()
     esm_model = esm_model.to(device)
     batch_converter = alphabet.get_batch_converter()
     esm_model.eval()
+    repr_layer = esm_model.num_layers
 
     data = [("seq"+str(i), seq) for i, seq in enumerate(sequences)]
     _, _, batch_tokens = batch_converter(data)
     batch_tokens = batch_tokens.to(device)
 
     with torch.no_grad():
-        results = esm_model(batch_tokens, repr_layers=[12])
-    token_reps = results["representations"][12]
+        results = esm_model(batch_tokens, repr_layers=[repr_layer])
+    token_reps = results["representations"][repr_layer]
     
-    embeddings = token_reps.mean(dim=1).cpu().numpy()  # (N, 480)
+    embeddings = token_reps[:, 1:-1].mean(dim=1).cpu().numpy()  # (N, 1280)
     return embeddings
 
 def predict_senescence(fasta_path, device="cuda"):
     """
     1. Reads sequences from a FASTA file
     2. Extracts ESM2 embeddings
-    3. Loads 'senseqnet.pth' model in the same folder
+    3. Loads 'SenSeqNet_model.pth' model in the same folder
     4. Predicts senescence label (0 or 1)
     5. Returns a list of dicts
     """
@@ -64,11 +69,11 @@ def predict_senescence(fasta_path, device="cuda"):
     # Extract embeddings
     embeddings = extract_esm_features(seq_strs, device=device)
 
-    # Reshape for LSTM: (N, seq_len=1, 768)
+    # Reshape for LSTM: (N, seq_len=1, 1280)
     embeddings = embeddings.reshape(-1, 1, embeddings.shape[1])
     X_torch = torch.tensor(embeddings, dtype=torch.float32).to(device)
 
-    # Load your pretrained LSTM-CNN from senseqnet.pth
+    # Load your pretrained LSTM-CNN from SenSeqNet_model.pth
     model = load_pretrained_model(device=device)
 
     # Forward pass

@@ -1,0 +1,17 @@
+MANIFEST.in
+setup.py
+senseqnet/SenSeqNet_model.pth
+senseqnet/__init__.py
+senseqnet/cli.py
+senseqnet/inference.py
+senseqnet/models.py
+senseqnet.egg-info/PKG-INFO
+senseqnet.egg-info/SOURCES.txt
+senseqnet.egg-info/dependency_links.txt
+senseqnet.egg-info/entry_points.txt
+senseqnet.egg-info/requires.txt
+senseqnet.egg-info/top_level.txt
+senseqnet/data/negative_0.4.fasta
+senseqnet/data/positive_0.4.fasta
+senseqnet/data/reps_30_rep_seq_neg.fasta
+senseqnet/data/reps_30_rep_seq_pos.fasta

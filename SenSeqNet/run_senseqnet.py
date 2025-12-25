@@ -3,9 +3,9 @@
 from senseqnet.inference import predict_senescence
 
 # Specify your input FASTA file
-fasta_file = "./senseqnet/data/negative_0.4.fasta"  # Replace with your actual FASTA file path
+fasta_file = "./senseqnet/data/reps_30_rep_seq_neg.fasta"  # Replace with your actual FASTA file path
 
-# Predict senescence using the pretrained model in senseqnet.pth
+# Predict senescence using the pretrained model in SenSeqNet_model.pth
 results = predict_senescence(fasta_path=fasta_file, device="cpu")
 
 # Print the results

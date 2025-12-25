@@ -7,11 +7,11 @@ import torch.nn.functional as F
 class ImprovedLSTMClassifier(nn.Module):
     def __init__(self, input_dim, hidden_dim, num_layers, num_classes, dropout_rate):
         """
-        input_dim = 480 
-        hidden_dim = 181 
-        num_layers = 4 
-        num_classes = 2 
-        dropout_rate = 0.5456 
+        input_dim = 1280
+        hidden_dim = 181
+        num_layers = 4
+        num_classes = 2
+        dropout_rate = 0.4397133138964481
         """
         super(ImprovedLSTMClassifier, self).__init__()
         
@@ -23,7 +23,7 @@ class ImprovedLSTMClassifier(nn.Module):
             dropout=dropout_rate,
             bidirectional=True
         )
-        # BatchNorm for LSTM output (2 * hidden_dim)
+        # Kept for checkpoint compatibility; not applied in forward.
         self.bn = nn.BatchNorm1d(hidden_dim * 2)
 
         # CNN layers
@@ -51,7 +51,7 @@ class ImprovedLSTMClassifier(nn.Module):
         Adjust the dummy batch size if your actual batch_size differs.
         """
         batch_size = 32  # same dummy size you used in training
-        # Create dummy input shape: (batch_size=32, seq_len=1, input_dim=480)
+        # Create dummy input shape: (batch_size=32, seq_len=1, input_dim=1280)
         dummy_x = torch.ones(batch_size, 1, input_dim)
         
         # Dummy initial hidden & cell states
@@ -62,9 +62,6 @@ class ImprovedLSTMClassifier(nn.Module):
         out, _ = self.lstm(dummy_x, (h0, c0))
         # Take the last time step: (batch_size, hidden_dim*2)
         out = out[:, -1, :]
-
-        # BatchNorm over LSTM output
-        out = self.bn(out)
 
         # CNN path
         out = out.unsqueeze(1).unsqueeze(-1)  # (batch_size, 1, hidden_dim*2, 1)
@@ -89,7 +86,7 @@ class ImprovedLSTMClassifier(nn.Module):
 
     def forward(self, x):
         """
-        x shape: (batch_size, seq_len=1, 480)
+        x shape: (batch_size, seq_len=1, 1280)
         """
         batch_sz = x.size(0)
 
@@ -111,9 +108,6 @@ class ImprovedLSTMClassifier(nn.Module):
         out, _ = self.lstm(x, (h0, c0))
         # Take last time step
         out = out[:, -1, :]  # (batch_sz, hidden_dim * 2)
-
-        # BN after LSTM
-        out = self.bn(out)
 
         # CNN path
         out = out.unsqueeze(1).unsqueeze(-1)  # (batch_sz, 1, hidden_dim*2, 1)

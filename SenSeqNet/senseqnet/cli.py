@@ -9,7 +9,7 @@ from senseqnet.inference import predict_senescence
 def main(fasta, device):
     """
     Simple CLI to run senescence detection on a FASTA file.
-    The model path is now fixed in senseqnet.inference (senseqnet.pth).
+    The model path is now fixed in senseqnet.inference (SenSeqNet_model.pth).
     """
     results = predict_senescence(fasta_path=fasta, device=device)
     click.echo("\nSenescence Prediction Results:\n")
