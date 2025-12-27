@@ -1,6 +1,6 @@
 Metadata-Version: 2.4
 Name: senseqnet
-Version: 1.1.1
+Version: 1.1.2
 Summary: A Deep Learning Framework for Cellular Senescence Detection from Protein Sequences
 Home-page: https://github.com/HanliJiang13/SenSeqNet_Package
 Author: Hanli Jiang

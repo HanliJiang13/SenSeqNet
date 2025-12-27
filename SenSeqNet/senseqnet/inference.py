@@ -58,6 +58,21 @@ def _iter_batches(chunks_iter, max_sequences_per_batch, max_tokens_per_batch):
     if batch:
         yield batch
 
+def _normalize_progress_interval(progress_interval):
+    if progress_interval is None:
+        return None
+    if progress_interval <= 0:
+        return None
+    return int(progress_interval)
+
+def _count_chunks_per_sequence(sequences, max_residues_per_chunk):
+    if max_residues_per_chunk is None:
+        return [1] * len(sequences)
+    counts = []
+    for seq in sequences:
+        counts.append((len(seq) + max_residues_per_chunk - 1) // max_residues_per_chunk)
+    return counts
+
 def load_pretrained_model(device="cuda"):
     """
     Initializes the ImprovedLSTMClassifier with your chosen hyperparams,
@@ -84,6 +99,7 @@ def extract_esm_features(
     max_sequences_per_batch=8,
     max_tokens_per_batch=2000,
     max_residues_per_chunk=1000,
+    progress_interval=100,
 ):
     """
     Returns an (N, 1280) mean-pooled ESM2 embedding array.
@@ -96,6 +112,8 @@ def extract_esm_features(
     esm_model.eval()
     repr_layer = esm_model.num_layers
 
+    progress_interval = _normalize_progress_interval(progress_interval)
+    total_sequences = len(sequences)
     chunk_size = _validate_chunking_settings(
         max_sequences_per_batch,
         max_tokens_per_batch,
@@ -103,6 +121,9 @@ def extract_esm_features(
     )
     embeddings = np.zeros((len(sequences), esm_model.embed_dim), dtype=np.float32)
     chunk_counts = np.zeros(len(sequences), dtype=np.int32)
+    remaining_chunks = _count_chunks_per_sequence(sequences, chunk_size)
+    completed_sequences = 0
+    next_progress = progress_interval
 
     chunks_iter = _iter_sequence_chunks(sequences, chunk_size)
     for batch in _iter_batches(chunks_iter, max_sequences_per_batch, max_tokens_per_batch):
@@ -123,10 +144,22 @@ def extract_esm_features(
         for (seq_idx, _), embedding in zip(batch, seq_reps):
             embeddings[seq_idx] += embedding
             chunk_counts[seq_idx] += 1
+            if progress_interval:
+                remaining_chunks[seq_idx] -= 1
+                if remaining_chunks[seq_idx] == 0:
+                    completed_sequences += 1
+
+        if progress_interval:
+            while completed_sequences >= next_progress:
+                print(f"Processed {next_progress}/{total_sequences} sequences")
+                next_progress += progress_interval
 
     if not np.all(chunk_counts):
         missing = np.where(chunk_counts == 0)[0]
         raise RuntimeError(f"Missing embeddings for sequences: {missing[:10]} ...")
+
+    if progress_interval and completed_sequences > 0 and completed_sequences < next_progress:
+        print(f"Processed {completed_sequences}/{total_sequences} sequences")
 
     embeddings /= chunk_counts[:, None]
     return embeddings
@@ -137,6 +170,7 @@ def predict_senescence(
     max_sequences_per_batch=8,
     max_tokens_per_batch=2000,
     max_residues_per_chunk=1000,
+    progress_interval=100,
 ):
     """
     1. Reads sequences from a FASTA file
@@ -157,6 +191,7 @@ def predict_senescence(
         max_sequences_per_batch=max_sequences_per_batch,
         max_tokens_per_batch=max_tokens_per_batch,
         max_residues_per_chunk=max_residues_per_chunk,
+        progress_interval=progress_interval,
     )
 
     # Reshape for LSTM: (N, seq_len=1, 1280)

@@ -27,12 +27,20 @@ from senseqnet.inference import predict_senescence
     type=int,
     help="Split long sequences into chunks of this many residues.",
 )
+@click.option(
+    "--progress-interval",
+    default=100,
+    show_default=True,
+    type=int,
+    help="Print progress every N sequences (0 to disable).",
+)
 def main(
     fasta,
     device,
     max_sequences_per_batch,
     max_tokens_per_batch,
     max_residues_per_chunk,
+    progress_interval,
 ):
     """
     Simple CLI to run senescence detection on a FASTA file.
@@ -44,6 +52,7 @@ def main(
         max_sequences_per_batch=max_sequences_per_batch,
         max_tokens_per_batch=max_tokens_per_batch,
         max_residues_per_chunk=max_residues_per_chunk,
+        progress_interval=progress_interval,
     )
     click.echo("\nSenescence Prediction Results:\n")
     for r in results:

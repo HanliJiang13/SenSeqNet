@@ -11,7 +11,7 @@ long_description = readme_path.read_text(encoding="utf-8") if readme_path.exists
 
 setuptools.setup(
     name="senseqnet",
-    version="1.1.1",
+    version="1.1.2",
     author="Hanli Jiang",
     author_email="hhanlijiang@mail.utoronto.ca",
     description="A Deep Learning Framework for Cellular Senescence Detection from Protein Sequences",

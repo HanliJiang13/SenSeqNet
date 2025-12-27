@@ -12,6 +12,7 @@ results = predict_senescence(
     max_sequences_per_batch=8,
     max_tokens_per_batch=2000,
     max_residues_per_chunk=1000,
+    progress_interval=100,
 )
 
 # Print the results
